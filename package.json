@@ -2,9 +2,6 @@
   "name": "@deflow/studio",
   "version": "0.0.1",
   "private": true,
-  "engines": {
-    "node": ">=22.12.0"
-  },
   "scripts": {
     "dev": "sanity dev",
     "build": "sanity build",
@@ -12,10 +9,10 @@
   },
   "dependencies": {
     "@sanity/code-input": "^7.2.10",
-    "@sanity/vision": "^6.0.0",
+    "@sanity/vision": "^5.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "sanity": "^6.0.0",
+    "sanity": "^5.0.0",
     "styled-components": "^6.4.3",
     "typescript": "^5.8.0"
   }
