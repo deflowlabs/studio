@@ -9,10 +9,10 @@
   },
   "dependencies": {
     "@sanity/code-input": "^7.2.10",
-    "@sanity/vision": "^4.0.0",
+    "@sanity/vision": "^5.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "sanity": "^4.0.0",
+    "sanity": "^5.0.0",
     "styled-components": "^6.4.3"
   },
   "devDependencies": {
