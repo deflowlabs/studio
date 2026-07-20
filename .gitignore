@@ -1,0 +1,16 @@
+# Sanity Studio build output
+dist/
+
+# Runtime cache
+.sanity/
+
+# Node dependencies
+node_modules/
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# Misc
+.DS_Store
