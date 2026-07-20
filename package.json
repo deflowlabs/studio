@@ -13,9 +13,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sanity": "^6.0.0",
-    "styled-components": "^6.4.3"
-  },
-  "devDependencies": {
+    "styled-components": "^6.4.3",
     "typescript": "^5.8.0"
   }
 }
