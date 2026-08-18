@@ -1,60 +1,25 @@
-/**
- * Announcement schema — CMS-managed top banner for time-sensitive news.
- * Only one announcement should be active at a time. Dismissible per-session.
- */
-import { defineType, defineField } from 'sanity'
+import { defineField, defineType } from 'sanity'
+import { BellIcon } from '@sanity/icons'
+import { requireCtaPair, uniqueEnabledDocument } from '../validators'
 
 export default defineType({
   name: 'announcement',
-  title: 'Announcement Banner',
+  title: 'Announcement',
   type: 'document',
-  icon: () => '📢',
+  icon: BellIcon,
+  validation: Rule => Rule.custom(document => requireCtaPair(document as Record<string, any>)),
   fields: [
-    defineField({
-      name: 'text',
-      title: 'Banner Text',
-      type: 'string',
-      description: 'Short announcement text (max 100 chars recommended)',
-      validation: (Rule) => Rule.required().max(150),
-    }),
-    defineField({
-      name: 'link',
-      title: 'Link URL',
-      type: 'url',
-      description: 'Where the banner links to (optional)',
-    }),
-    defineField({
-      name: 'linkText',
-      title: 'Link Text',
-      type: 'string',
-      initialValue: 'Learn more →',
-      description: 'CTA text shown next to the announcement',
-    }),
-    defineField({
-      name: 'isActive',
-      title: 'Active',
-      type: 'boolean',
-      initialValue: false,
-      description: 'Only one announcement should be active at a time',
-    }),
-    defineField({
-      name: 'backgroundColor',
-      title: 'Background Color',
-      type: 'string',
-      initialValue: '#1E1E2E',
-      description: 'Hex color for the banner background (default: dark indigo)',
-    }),
+    defineField({ name: 'text', title: 'Message', type: 'string', description: 'One concise sentence displayed at the top of the website.', validation: Rule => Rule.required().min(8).max(150) }),
+    defineField({ name: 'cta', title: 'Optional call to action', type: 'cta' }),
+    defineField({ name: 'tone', title: 'Tone', type: 'string', description: 'Uses an accessible, design-system colour pair.', options: { list: [{ title: 'Information', value: 'info' }, { title: 'Positive update', value: 'success' }, { title: 'Important notice', value: 'warning' }], layout: 'radio' }, initialValue: 'info', validation: Rule => Rule.required() }),
+    defineField({ name: 'isActive', title: 'Show this announcement', type: 'boolean', initialValue: false, description: 'Only one announcement can be active.', validation: Rule => Rule.custom(uniqueEnabledDocument('announcement', 'isActive')) }),
+    defineField({ name: 'link', title: 'Legacy link URL', type: 'url', readOnly: true, hidden: ({ value }) => !value }),
+    defineField({ name: 'linkText', title: 'Legacy link text', type: 'string', readOnly: true, hidden: ({ value }) => !value }),
+    defineField({ name: 'backgroundColor', title: 'Legacy background colour', type: 'string', readOnly: true, hidden: ({ value }) => !value }),
   ],
+  orderings: [{ title: 'Last edited', name: 'updatedAtDesc', by: [{ field: '_updatedAt', direction: 'desc' }] }],
   preview: {
-    select: {
-      title: 'text',
-      isActive: 'isActive',
-    },
-    prepare({ title, isActive }) {
-      return {
-        title: title || 'Untitled',
-        subtitle: isActive ? '🟢 Active' : '⚪ Inactive',
-      }
-    },
+    select: { title: 'text', active: 'isActive', tone: 'tone' },
+    prepare({ title, active, tone }) { return { title: title || 'Untitled announcement', subtitle: `${active ? 'Active' : 'Inactive'} · ${tone || 'No tone'}` } },
   },
 })

@@ -1,110 +1,73 @@
-/**
- * Custom Studio desk structure — organized content sections
- * with icons, descriptions, and logical grouping.
- *
- * Sections:
- *   📝 Editorial — Blog posts, authors, categories
- *   🔬 Labs — Research projects
- */
 import type { StructureResolver } from 'sanity/structure'
+import {
+  BellIcon,
+  BookIcon,
+  ClockIcon,
+  ComposeIcon,
+  DocumentIcon,
+  FolderIcon,
+  HelpCircleIcon,
+  IceCreamIcon,
+  ProjectsIcon,
+  RocketIcon,
+  TagIcon,
+  UserIcon,
+  UsersIcon,
+  WarningOutlineIcon,
+} from '@sanity/icons'
+import { EditorGuide } from './components/EditorGuide'
 
-export const deskStructure: StructureResolver = (S) =>
+const apiVersion = '2026-08-17'
+const contentTypes = ['post', 'author', 'category', 'labsProject', 'announcement', 'partner', 'testimonial']
+
+export const deskStructure: StructureResolver = S =>
   S.list()
-    .title('DeFlow Labs Content')
+    .title('DeFlow content')
     .items([
-      // ── Editorial Section ──────────────────────────
       S.listItem()
-        .title('Editorial')
-        .icon(() => '📝')
+        .title('Start here')
+        .icon(RocketIcon)
         .child(
-          S.list()
-            .title('Editorial')
-            .items([
-              S.listItem()
-                .title('Blog Posts')
-                .icon(() => '📰')
-                .schemaType('post')
-                .child(
-                  S.documentTypeList('post')
-                    .title('Blog Posts')
-                    .defaultOrdering([{ field: 'publishedAt', direction: 'desc' }]),
-                ),
-              S.listItem()
-                .title('Authors')
-                .icon(() => '👤')
-                .schemaType('author')
-                .child(S.documentTypeList('author').title('Authors')),
-              S.listItem()
-                .title('Categories')
-                .icon(() => '🏷️')
-                .schemaType('category')
-                .child(S.documentTypeList('category').title('Categories')),
-            ]),
-        ),
-
-      // ── Announcements ───────────────────────────────
-      S.listItem()
-        .title('Announcements')
-        .icon(() => '📢')
-        .schemaType('announcement')
-        .child(
-          S.documentTypeList('announcement')
-            .title('Announcement Banners')
-            .defaultOrdering([{ field: '_updatedAt', direction: 'desc' }]),
+          S.list().title('Editorial workflow').items([
+            S.listItem().title('Drafts awaiting review').icon(ComposeIcon).child(
+              S.documentList().title('Drafts awaiting review').filter('_id in path("drafts.**")').apiVersion(apiVersion).defaultOrdering([{ field: '_updatedAt', direction: 'desc' }]),
+            ),
+            S.listItem().title('Incomplete content').icon(WarningOutlineIcon).child(
+              S.documentList().title('Incomplete content').filter('_type in $types && (!defined(title) && !defined(name) && !defined(text))').params({ types: contentTypes }).apiVersion(apiVersion),
+            ),
+            S.listItem().title('Recently edited').icon(ClockIcon).child(
+              S.documentList().title('Recently edited').filter('_type in $types').params({ types: contentTypes }).apiVersion(apiVersion).defaultOrdering([{ field: '_updatedAt', direction: 'desc' }]),
+            ),
+            S.listItem().title('Editor guide').icon(HelpCircleIcon).child(
+              S.component(EditorGuide).title('Editor guide'),
+            ),
+          ]),
         ),
 
       S.divider(),
-
-      // ── Labs Section ───────────────────────────────
-      S.listItem()
-        .title('Labs Projects')
-        .icon(() => '🔬')
-        .schemaType('labsProject')
-        .child(
-          S.documentTypeList('labsProject')
-            .title('Research Projects')
-            .defaultOrdering([{ field: 'status', direction: 'asc' }]),
-        ),
-
-      S.listItem()
-        .title('Testimonials')
-        .icon(() => '💬')
-        .schemaType('testimonial')
-        .child(
-          S.documentTypeList('testimonial')
-            .title('Testimonials'),
-        ),
-
-      S.listItem()
-        .title('Partners')
-        .icon(() => '🤝')
-        .schemaType('partner')
-        .child(
-          S.documentTypeList('partner')
-            .title('Partners & Integrations'),
-        ),
+      S.listItem().title('Editorial').icon(BookIcon).child(
+        S.list().title('Editorial').items([
+          S.documentTypeListItem('post').title('Blog posts').icon(DocumentIcon),
+          S.documentTypeListItem('author').title('Authors').icon(UserIcon),
+          S.documentTypeListItem('category').title('Categories').icon(TagIcon),
+        ]),
+      ),
+      S.listItem().title('Product').icon(ProjectsIcon).child(
+        S.list().title('Product content').items([
+          S.documentTypeListItem('labsProject').title('Labs projects').icon(IceCreamIcon),
+        ]),
+      ),
+      S.listItem().title('Marketing').icon(BellIcon).child(
+        S.list().title('Marketing').items([
+          S.documentTypeListItem('announcement').title('Announcements').icon(BellIcon),
+          S.documentTypeListItem('partner').title('Partners').icon(UsersIcon),
+        ]),
+      ),
 
       S.divider(),
-
-      // ── Quick Access ───────────────────────────────
-      S.listItem()
-        .title('Drafts')
-        .icon(() => '📋')
-        .child(
-          S.documentList()
-            .title('All Drafts')
-            .filter('_id in path("drafts.**")')
-            .apiVersion('2026-07-17'),
-        ),
-
-      S.listItem()
-        .title('Recently Edited')
-        .icon(() => '🕐')
-        .child(
-          S.documentList()
-            .title('Recently Edited')
-            .filter('_type in ["post", "labsProject", "author"]')
-            .apiVersion('2026-07-17')
-            .defaultOrdering([{ field: '_updatedAt', direction: 'desc' }]),
-        ),
+      S.listItem().title('Unused / legacy content').icon(FolderIcon).child(
+        S.list().title('Not currently displayed').items([
+          S.documentTypeListItem('testimonial').title('Testimonials — not displayed'),
+        ]),
+      ),
     ])

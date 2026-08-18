@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ESNext",
     "module": "ESNext",
+    "jsx": "react-jsx",
     "moduleResolution": "bundler",
-    "strict": true
+    "allowImportingTsExtensions": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["node", "react", "react-dom"],
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true
   }
 }

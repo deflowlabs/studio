@@ -1,32 +1,16 @@
-/**
- * Category schema — blog post taxonomy.
- * Predefined categories: Product, Research, Engineering, Ecosystem, Company.
- */
-import { defineType, defineField } from 'sanity'
+import { defineField, defineType } from 'sanity'
+import { TagIcon } from '@sanity/icons'
 
 export default defineType({
   name: 'category',
   title: 'Category',
   type: 'document',
+  icon: TagIcon,
   fields: [
-    defineField({
-      name: 'title',
-      title: 'Title',
-      type: 'string',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
-      options: { source: 'title' },
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'description',
-      title: 'Description',
-      type: 'text',
-      rows: 2,
-    }),
+    defineField({ name: 'title', title: 'Name', type: 'string', description: 'Use a broad, reusable editorial topic.', validation: Rule => Rule.required().min(2).max(40) }),
+    defineField({ name: 'slug', title: 'URL slug', type: 'slug', options: { source: 'title', isUnique: async (value, context) => context.defaultIsUnique(value, context) }, validation: Rule => Rule.required() }),
+    defineField({ name: 'description', title: 'Editor guidance', type: 'text', rows: 3, description: 'Explain when this category should be used.', validation: Rule => Rule.required().min(20).max(240) }),
   ],
+  orderings: [{ title: 'Name', name: 'titleAsc', by: [{ field: 'title', direction: 'asc' }] }],
+  preview: { select: { title: 'title', subtitle: 'description' } },
 })
