@@ -178,12 +178,12 @@ Enable credentials only where authenticated preview needs them. Do not use `*` o
 
 ## GitHub Actions
 
-`.github/workflows/quality.yml` runs on every pull request and push to `main` with Node 24. It checks types, validators, schema extraction, tests, the production-equivalent Studio build and production dependencies, then publishes a concise run summary. When `SANITY_AUTH_TOKEN` is configured, it also validates documents and dry-runs the additive migration against the repository variable `SANITY_VALIDATION_DATASET` (use `preview`, never production, for routine CI).
+`.github/workflows/quality.yml` runs on every pull request and push to `main` with Node 24. It checks types, validators, schema extraction, tests, the production-equivalent Studio build and production dependencies, then publishes a concise run summary. When `SANITY_AUTH_TOKEN` is configured, it also validates documents and dry-runs the additive migration against the repository variable `SANITY_VALIDATION_DATASET`. Both commands are read-only: when the variable is absent, CI validates `production`; set it to an existing isolated dataset such as `preview` if the project has one.
 
 | GitHub setting | Purpose | Required |
 |---|---|---|
 | Secret `SANITY_AUTH_TOKEN` | Least-privilege token for dataset validation and migration dry run | Recommended on protected branches |
-| Variable `SANITY_VALIDATION_DATASET` | Isolated CI dataset; normally `preview` | Recommended when the token is set |
+| Variable `SANITY_VALIDATION_DATASET` | Existing dataset used by read-only validation and migration dry-runs; defaults to `production` | Optional |
 
 Fork pull requests do not receive the secret, so network dataset gates show as skipped while local schema/tests/build still run. Dependabot reviews npm and GitHub Actions updates weekly. Action dependencies are pinned to immutable SHAs and obsolete runs are cancelled.
 

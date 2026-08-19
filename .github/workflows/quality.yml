@@ -23,7 +23,9 @@ jobs:
       SANITY_STUDIO_PREVIEW_URL: http://localhost:3000
       SANITY_STUDIO_HOST: http://localhost:3333
       SANITY_STUDIO_ENABLE_VISION: 'false'
-      SANITY_VALIDATION_DATASET: ${{ vars.SANITY_VALIDATION_DATASET || 'preview' }}
+      # Validation and migration dry-runs do not write content. Default to the
+      # configured production dataset so a separate CI dataset is optional.
+      SANITY_VALIDATION_DATASET: ${{ vars.SANITY_VALIDATION_DATASET || 'production' }}
       SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
