@@ -1,6 +1,6 @@
 import { defineField, defineType } from 'sanity'
 import { ProjectsIcon } from '@sanity/icons'
-import { dateOrder } from '../validators'
+import { dateOrder } from '../validators.ts'
 
 export default defineType({
   name: 'labsProject',

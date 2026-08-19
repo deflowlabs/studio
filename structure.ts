@@ -5,7 +5,6 @@ import {
   ClockIcon,
   ComposeIcon,
   DocumentIcon,
-  FolderIcon,
   HelpCircleIcon,
   IceCreamIcon,
   ProjectsIcon,
@@ -18,7 +17,7 @@ import {
 import { EditorGuide } from './components/EditorGuide'
 
 const apiVersion = '2026-08-17'
-const contentTypes = ['post', 'author', 'category', 'labsProject', 'announcement', 'partner', 'testimonial']
+const contentTypes = ['post', 'author', 'category', 'labsProject', 'announcement', 'partner']
 
 export const deskStructure: StructureResolver = S =>
   S.list()
@@ -29,17 +28,17 @@ export const deskStructure: StructureResolver = S =>
         .icon(RocketIcon)
         .child(
           S.list().title('Editorial workflow').items([
-            S.listItem().title('Drafts awaiting review').icon(ComposeIcon).child(
-              S.documentList().title('Drafts awaiting review').filter('_id in path("drafts.**")').apiVersion(apiVersion).defaultOrdering([{ field: '_updatedAt', direction: 'desc' }]),
+            S.listItem().title('Drafts ready for review').icon(ComposeIcon).child(
+              S.documentList().title('Drafts ready for review').filter('_id in path("drafts.**")').apiVersion(apiVersion).defaultOrdering([{ field: '_updatedAt', direction: 'desc' }]),
             ),
-            S.listItem().title('Incomplete content').icon(WarningOutlineIcon).child(
-              S.documentList().title('Incomplete content').filter('_type in $types && (!defined(title) && !defined(name) && !defined(text))').params({ types: contentTypes }).apiVersion(apiVersion),
+            S.listItem().title('Needs attention').icon(WarningOutlineIcon).child(
+              S.documentList().title('Needs attention').filter('_type in $types && (!defined(title) && !defined(name) && !defined(text))').params({ types: contentTypes }).apiVersion(apiVersion),
             ),
             S.listItem().title('Recently edited').icon(ClockIcon).child(
               S.documentList().title('Recently edited').filter('_type in $types').params({ types: contentTypes }).apiVersion(apiVersion).defaultOrdering([{ field: '_updatedAt', direction: 'desc' }]),
             ),
-            S.listItem().title('Editor guide').icon(HelpCircleIcon).child(
-              S.component(EditorGuide).title('Editor guide'),
+            S.listItem().title('How to publish').icon(HelpCircleIcon).child(
+              S.component(EditorGuide).title('How to publish'),
             ),
           ]),
         ),
@@ -61,13 +60,6 @@ export const deskStructure: StructureResolver = S =>
         S.list().title('Marketing').items([
           S.documentTypeListItem('announcement').title('Announcements').icon(BellIcon),
           S.documentTypeListItem('partner').title('Partners').icon(UsersIcon),
-        ]),
-      ),
-
-      S.divider(),
-      S.listItem().title('Unused / legacy content').icon(FolderIcon).child(
-        S.list().title('Not currently displayed').items([
-          S.documentTypeListItem('testimonial').title('Testimonials — not displayed'),
         ]),
       ),
     ])

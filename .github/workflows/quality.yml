@@ -3,7 +3,7 @@ name: Studio quality
 on:
   pull_request:
   push:
-    branches: [master]
+    branches: [main]
 
 permissions:
   contents: read
@@ -21,6 +21,7 @@ jobs:
       SANITY_STUDIO_DATASET: production
       SANITY_STUDIO_API_VERSION: 2026-08-17
       SANITY_STUDIO_PREVIEW_URL: http://localhost:3000
+      SANITY_STUDIO_HOST: http://localhost:3333
       SANITY_STUDIO_ENABLE_VISION: 'false'
       SANITY_VALIDATION_DATASET: ${{ vars.SANITY_VALIDATION_DATASET || 'preview' }}
       SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}

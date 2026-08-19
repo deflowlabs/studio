@@ -1,6 +1,6 @@
 import { defineField, defineType } from 'sanity'
 import { BellIcon } from '@sanity/icons'
-import { requireCtaPair, uniqueEnabledDocument } from '../validators'
+import { requireCtaPair, uniqueEnabledDocument } from '../validators.ts'
 
 export default defineType({
   name: 'announcement',

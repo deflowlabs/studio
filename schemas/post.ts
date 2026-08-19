@@ -1,6 +1,6 @@
 import { defineField, defineType } from 'sanity'
 import { DocumentTextIcon } from '@sanity/icons'
-import { uniqueEnabledDocument } from '../validators'
+import { uniqueEnabledDocument } from '../validators.ts'
 
 export default defineType({
   name: 'post',
@@ -20,7 +20,7 @@ export default defineType({
     defineField({ name: 'body', title: 'Article body', type: 'portableText', group: 'content', description: 'Use Heading 2 and Heading 3 in order. Every image requires alternative text.', validation: Rule => Rule.required().min(1) }),
     defineField({ name: 'author', title: 'Author', type: 'reference', group: 'publishing', to: [{ type: 'author' }], validation: Rule => Rule.required() }),
     defineField({ name: 'categories', title: 'Categories', type: 'array', group: 'publishing', of: [{ type: 'reference', to: [{ type: 'category' }] }], validation: Rule => Rule.required().min(1).unique() }),
-    defineField({ name: 'publishedAt', title: 'Publication date and time', type: 'datetime', group: 'publishing', description: 'Future dates remain hidden from the public website.', validation: Rule => Rule.required() }),
+    defineField({ name: 'publishedAt', title: 'Publication date and time', type: 'datetime', group: 'publishing', initialValue: () => new Date().toISOString(), description: 'Future dates remain hidden from the public website.', validation: Rule => Rule.required() }),
     defineField({ name: 'isFeatured', title: 'Featured post', type: 'boolean', group: 'publishing', initialValue: false, description: 'Only one post can be featured.', validation: Rule => Rule.custom(uniqueEnabledDocument('post', 'isFeatured')) }),
     defineField({ name: 'readingTime', title: 'Reading time', type: 'number', group: 'publishing', description: 'Optional estimated minutes.', validation: Rule => Rule.integer().min(1).max(60) }),
     defineField({ name: 'seo', title: 'Search and sharing', type: 'seo', group: 'seo' }),

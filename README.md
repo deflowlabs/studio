@@ -7,7 +7,7 @@ The guided Sanity editorial workspace for content displayed on [deflowlabs.io](h
 
 ## Responsibilities and architecture
 
-Studio owns structured marketing content for blog posts, authors, categories, Labs projects, announcements and partners. Testimonials are preserved as legacy documents but intentionally have no website consumer.
+Studio owns structured marketing content for blog posts, authors, categories, Labs projects, announcements and partners. Unused Testimonials were removed after confirming that the production dataset contained no testimonial drafts or published documents.
 
 ```text
 Editor ──► Sanity Studio ──► Sanity dataset
@@ -23,9 +23,8 @@ Important files:
 |---|---|
 | `sanity.config.ts` | Validated environment, plugins, Presentation and document actions |
 | `structure.ts` | Start Here and plain-language editorial navigation |
-| `schemas/` | Document and reusable object contracts |
+| `schemas/` | Document/object contracts, validation and sensible initial values |
 | `validators.ts` | Safe URLs, uniqueness and cross-field rules |
-| `templates.ts` | Sensible initial values |
 | `permissions.ts` | Role-aware publishing/destructive action guidance |
 | `migrations/` | Reproducible additive content changes |
 | `schema.json` | Extracted schema consumed by TypeGen |
@@ -62,9 +61,10 @@ All `SANITY_STUDIO_*` values are embedded in the browser bundle. They configure 
 | `SANITY_STUDIO_DATASET` | Prefer `preview` | `production` | Yes |
 | `SANITY_STUDIO_API_VERSION` | `2026-08-17` | Same pinned date | Yes |
 | `SANITY_STUDIO_PREVIEW_URL` | `http://localhost:3000` | `https://deflowlabs.io` or stable protected staging | Yes |
+| `SANITY_STUDIO_HOST` | `http://localhost:3333` | `https://studio.deflowlabs.io` | Yes |
 | `SANITY_STUDIO_ENABLE_VISION` | `false` | `false` | Yes |
 
-Never configure `SANITY_API_READ_TOKEN` or `SANITY_PREVIEW_COOKIE_SECRET` in Studio. They belong only to the website server environment. Enable Vision only in a temporary technical-administrator environment.
+Never configure `SANITY_API_READ_TOKEN` in Studio. It belongs only to the website server environment. Enable Vision only in a temporary technical-administrator environment.
 
 ## Editor workflow
 
@@ -73,7 +73,8 @@ The **Start here** area surfaces drafts needing review, incomplete documents, re
 - **Editorial:** posts, authors and categories.
 - **Product:** Labs projects.
 - **Marketing:** announcements and partners.
-- **Unused / legacy:** testimonials retained without a website consumer.
+
+The **How to publish** screen provides the visual workflow, role boundaries, content-area guidance and final review checklist. Releases are disabled because DeFlow uses drafts plus administrator review rather than Sanity Releases.
 
 To submit content:
 
@@ -98,20 +99,18 @@ Do not duplicate documents to bypass a featured-post, active-announcement or slu
 
 **Partner:** provide a valid URL and meaningful logo alternative. Labs uses references, never a duplicated free-text partner name.
 
-**Testimonial:** preserved under legacy. Publishing it does not change the website.
-
 ## Website draft preview
 
-Presentation opens the website through `/api/preview/enable`. The website validates the Studio origin, stores encrypted preview state in an `HttpOnly` cookie and keeps its read token off the browser.
+Presentation opens the website through `/preview/enable`. The official Nuxt Sanity integration validates the signed preview URL, stores random preview state in an `HttpOnly`, cross-site-safe production cookie and keeps its read token off the browser.
 
 1. Start `/website` on `http://localhost:3000` with its README configuration.
 2. Set `SANITY_STUDIO_PREVIEW_URL=http://localhost:3000`.
 3. Add exact credentialed Sanity CORS origins for both local URLs.
 4. Start Studio, open a post/announcement/Labs project and select Presentation.
 5. Confirm drafts are visible only in the preview session.
-6. End with website `/api/preview/disable`.
+6. End with website `/preview/disable`.
 
-The website needs server-only `SANITY_API_READ_TOKEN` and a 32+ character `SANITY_PREVIEW_COOKIE_SECRET`.
+The website needs only the server-side `SANITY_API_READ_TOKEN` for draft access. Production framing also requires `NUXT_SANITY_STUDIO_ORIGIN=https://studio.deflowlabs.io`; no preview token or cookie secret belongs in Studio.
 
 ## Schema development and TypeGen
 
@@ -120,7 +119,7 @@ Prefer additive schema changes so existing documents remain readable.
 1. Add/update a type in `schemas/` and export it from `schemas/index.ts`.
 2. Add plain-language field descriptions, examples, groups, previews and initial values.
 3. Add field and document-level validation.
-4. Update templates/Structure only when they improve the editor task.
+4. Update schema initial values or Structure only when they improve the editor task.
 5. Update tests.
 6. Run:
 
@@ -140,7 +139,7 @@ TypeGen scans sibling website GROQ and writes `../website/app/types/sanity.gener
 |---|---|
 | `npm run dev` | Start Studio |
 | `npm run typecheck` | TypeScript check |
-| `npm test` | Validator, permissions, template and query tests |
+| `npm test` | Validator, permissions, editor-experience and schema tests |
 | `npm run schema:extract` | Regenerate `schema.json` |
 | `npm run typegen` | Regenerate website Sanity types |
 | `npm run check` | Typecheck, test and schema extraction |
@@ -179,7 +178,7 @@ Enable credentials only where authenticated preview needs them. Do not use `*` o
 
 ## GitHub Actions
 
-`.github/workflows/quality.yml` runs on every pull request and push to `master` with Node 24. It checks types, validators, schema extraction, tests, the production-equivalent Studio build and production dependencies, then publishes a concise run summary. When `SANITY_AUTH_TOKEN` is configured, it also validates documents and dry-runs the additive migration against the repository variable `SANITY_VALIDATION_DATASET` (use `preview`, never production, for routine CI).
+`.github/workflows/quality.yml` runs on every pull request and push to `main` with Node 24. It checks types, validators, schema extraction, tests, the production-equivalent Studio build and production dependencies, then publishes a concise run summary. When `SANITY_AUTH_TOKEN` is configured, it also validates documents and dry-runs the additive migration against the repository variable `SANITY_VALIDATION_DATASET` (use `preview`, never production, for routine CI).
 
 | GitHub setting | Purpose | Required |
 |---|---|---|
@@ -200,10 +199,10 @@ Studio is a static single-page application. `vercel.json` builds `dist` and supp
 | Install | `npm ci` |
 | Build | `npm run build` |
 | Output | `dist` |
-| Production Branch | `master` |
+| Production Branch | `main` |
 | Domain | Dedicated domain, e.g. `studio.deflowlabs.io` |
 
-Configure all five `SANITY_STUDIO_*` variables separately for Vercel Development, Preview and Production. Use a preview dataset and stable protected website URL outside production.
+Configure all six `SANITY_STUDIO_*` variables separately for Vercel Development, Preview and Production. Use a preview dataset and stable protected website URL outside production.
 
 Before deployment:
 

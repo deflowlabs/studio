@@ -2,7 +2,7 @@ import { at, defineMigration, patch, set, setIfMissing } from 'sanity/migrate'
 import type { SanityDocument } from 'sanity'
 
 type LegacyDocument = SanityDocument & {
-  _type: 'post' | 'announcement' | 'labsProject' | 'partner' | 'testimonial'
+  _type: 'post' | 'announcement' | 'labsProject' | 'partner'
   seo?: Record<string, unknown>
   seoTitle?: string
   seoDescription?: string
@@ -21,7 +21,7 @@ function announcementTone(colour?: string) {
 
 export default defineMigration({
   title: 'Backfill structured SEO, calls to action and display defaults',
-  documentTypes: ['post', 'announcement', 'labsProject', 'partner', 'testimonial'],
+  documentTypes: ['post', 'announcement', 'labsProject', 'partner'],
   migrate: {
     document(document) {
       const doc = document as LegacyDocument
@@ -42,11 +42,11 @@ export default defineMigration({
         }
       }
 
-      if (['labsProject', 'partner', 'testimonial'].includes(doc._type)) {
+      if (['labsProject', 'partner'].includes(doc._type)) {
         operations.push(at('displayOrder', setIfMissing(100)))
       }
 
-      if (doc._type === 'partner' || doc._type === 'testimonial') {
+      if (doc._type === 'partner') {
         operations.push(at('isPublic', setIfMissing(false)))
       }
 
