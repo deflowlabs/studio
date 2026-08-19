@@ -159,8 +159,8 @@ Never begin with production.
 ```bash
 npx sanity dataset export production backups/production-YYYY-MM-DD.tar.gz
 npx sanity migration list
-npx sanity migration run 001-structured-content --dry-run --dataset preview
-npx sanity migration run 001-structured-content --dataset preview
+npx sanity migration run 001-structured-content --dry-run --project i34vbeac --dataset preview
+npx sanity migration run 001-structured-content --project i34vbeac --dataset preview
 ```
 
 Review mutations, warnings, counts and reference choices; validate all preview documents; complete editor UAT; deploy backward-compatible website consumers; obtain administrator approval; export production again; then run and validate production. Preserve IDs, slugs, assets, drafts/published state and URLs. Never guess an ambiguous Partner reference from free text.

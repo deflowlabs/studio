@@ -46,7 +46,7 @@ jobs:
       - name: Dry-run additive migration
         id: migration
         if: ${{ env.SANITY_AUTH_TOKEN != '' }}
-        run: npx sanity migration run 001-structured-content --dry-run --dataset "$SANITY_VALIDATION_DATASET"
+        run: npx sanity migration run 001-structured-content --dry-run --project "$SANITY_STUDIO_PROJECT_ID" --dataset "$SANITY_VALIDATION_DATASET"
       - id: audit
         run: npm audit --omit=dev --audit-level=high
       - name: Publish Studio summary
