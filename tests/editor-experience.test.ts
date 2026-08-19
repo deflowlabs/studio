@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import announcement from '../schemas/announcement.ts'
+import author from '../schemas/author.ts'
 import labsProject from '../schemas/labsProject.ts'
 import post from '../schemas/post.ts'
 
@@ -24,6 +25,10 @@ test('primary content types own their defaults without duplicate templates', asy
   assert.equal(status?.initialValue, 'upcoming')
   assert.equal(displayOrder?.initialValue, 100)
 
+  for (const schema of [post, author, labsProject]) {
+    assert.equal(schema.groups?.some(group => 'default' in group && group.default === true), false, `${schema.name} should open All fields`)
+  }
+
   const config = await readFile(new URL('../sanity.config.ts', import.meta.url), 'utf8')
   assert.doesNotMatch(config, /schema:\s*{[^}]*templates/s)
 })
@@ -38,4 +43,5 @@ test('legacy Testimonials and unused Releases are absent from the editor experie
   assert.match(config, /releases:\s*{\s*enabled:\s*false\s*}/)
   assert.doesNotMatch(structure, /testimonial|Unused \/ legacy/i)
   assert.doesNotMatch(schemaIndex, /testimonial/i)
+  assert.match(structure, /Website banners/)
 })

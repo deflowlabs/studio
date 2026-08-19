@@ -58,7 +58,7 @@ export const deskStructure: StructureResolver = S =>
       ),
       S.listItem().title('Marketing').icon(BellIcon).child(
         S.list().title('Marketing').items([
-          S.documentTypeListItem('announcement').title('Announcements').icon(BellIcon),
+          S.documentTypeListItem('announcement').title('Website banners').icon(BellIcon),
           S.documentTypeListItem('partner').title('Partners').icon(UsersIcon),
         ]),
       ),
