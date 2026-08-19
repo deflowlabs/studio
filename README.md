@@ -7,7 +7,7 @@ The guided Sanity editorial workspace for content displayed on [deflowlabs.io](h
 
 ## Responsibilities and architecture
 
-Studio owns structured marketing content for blog posts, authors, categories, Labs projects, announcements and partners. Unused Testimonials were removed after confirming that the production dataset contained no testimonial drafts or published documents.
+Studio owns structured marketing content for blog posts, authors, categories, Labs projects, website banners and partners. Unused Testimonials were removed after confirming that the production dataset contained no testimonial drafts or published documents.
 
 ```text
 Editor ──► Sanity Studio ──► Sanity dataset
@@ -60,7 +60,7 @@ All `SANITY_STUDIO_*` values are embedded in the browser bundle. They configure 
 | `SANITY_STUDIO_PROJECT_ID` | `i34vbeac` | Approved project ID | Yes |
 | `SANITY_STUDIO_DATASET` | Prefer `preview` | `production` | Yes |
 | `SANITY_STUDIO_API_VERSION` | `2026-08-17` | Same pinned date | Yes |
-| `SANITY_STUDIO_PREVIEW_URL` | `http://localhost:3000` | `https://deflowlabs.io` or stable protected staging | Yes |
+| `SANITY_STUDIO_PREVIEW_URL` | `http://localhost:3000` | `https://preview.deflowlabs.io` | Yes |
 | `SANITY_STUDIO_HOST` | `http://localhost:3333` | `https://studio.deflowlabs.io` | Yes |
 | `SANITY_STUDIO_ENABLE_VISION` | `false` | `false` | Yes |
 
@@ -72,7 +72,7 @@ The **Start here** area surfaces drafts needing review, incomplete documents, re
 
 - **Editorial:** posts, authors and categories.
 - **Product:** Labs projects.
-- **Marketing:** announcements and partners.
+- **Marketing:** website banners and partners.
 
 The **How to publish** screen provides the visual workflow, role boundaries, content-area guidance and final review checklist. Releases are disabled because DeFlow uses drafts plus administrator review rather than Sanity Releases.
 
@@ -89,19 +89,34 @@ Do not duplicate documents to bypass a featured-post, active-announcement or slu
 
 ### Content contracts
 
-**Post:** title, unique slug, excerpt, author, cover image/alt, Portable Text body, publication date and SEO are required. Categories are supported. Public queries exclude drafts and future dates. Only one post can be featured.
+**Post:** title, unique slug, excerpt, author, cover image/alt, Portable Text body, publication date and SEO are required. The first category is the card badge; filters match every category. Category slug `announcements` enables the leading story. Only an explicit `Featured post` value creates a featured placement.
 
 **Author/category:** use complete public names/descriptions and valid URLs. Deletion protection is reference-aware.
 
 **Labs project:** set validated status/dates, explicit display order, Partner reference, structured CTA, Portable Text details and SEO. Display order—not edit time—controls the website.
 
-**Announcement:** message and CTA form one unit. Use semantic tone, validate dates and keep only one active announcement.
+**Website banner:** message and CTA form one unit. Use semantic tone and keep only one active, published banner.
 
-**Partner:** provide a valid URL and meaningful logo alternative. Labs uses references, never a duplicated free-text partner name.
+**Partner:** provide a valid URL and meaningful logo alternative. Labs uses references; unapproved Partners remain internal and are never returned to the public website.
+
+### CMS-to-website field contract
+
+| Content | Field | Classification | Public result |
+|---|---|---|---|
+| Post | title, slug, excerpt, body, publication date, reading time | Rendered | Blog listing and article page |
+| Post | category order / category slug | Behavioural | First badge, all-category filtering and `announcements` placement |
+| Post | Featured post | Behavioural | One explicit featured story; announcement placement wins conflicts |
+| Post | cover crop/hotspot/alt | Rendered | Responsive image; 1600×900 recommended, 1200×675 minimum |
+| Post/Labs | SEO title, description, sharing image, noIndex | Behavioural | Metadata, 1200×630 sharing image, robots and sitemap |
+| Author | portrait, role, biography, links | Rendered | Article attribution and author page; square 400×400 minimum |
+| Labs | details, dates, status, tags, CTA, displayOrder | Rendered + behavioural | Detail page, button treatment and stable order |
+| Partner | isPublic | Behavioural | Gates name, logo and URL; internal note is never queried |
+| Website banner | active, tone, CTA style and revision | Rendered + behavioural | Visibility, accessible treatment and dismissal reset |
+| Legacy/read-only fields | old SEO, partner text, old banner colours/links | Legacy | Preserved for migration history; not a public fallback |
 
 ## Website draft preview
 
-Presentation opens the website through `/preview/enable`. The official Nuxt Sanity integration validates the signed preview URL, stores random preview state in an `HttpOnly`, cross-site-safe production cookie and keeps its read token off the browser.
+Presentation opens only the dedicated preview website through `/preview/enable`. The public `deflowlabs.io` deployment rejects preview configuration and has no Sanity read token, Visual Editing endpoint or stega output.
 
 1. Start `/website` on `http://localhost:3000` with its README configuration.
 2. Set `SANITY_STUDIO_PREVIEW_URL=http://localhost:3000`.
@@ -110,7 +125,7 @@ Presentation opens the website through `/preview/enable`. The official Nuxt Sani
 5. Confirm drafts are visible only in the preview session.
 6. End with website `/preview/disable`.
 
-The website needs only the server-side `SANITY_API_READ_TOKEN` for draft access. Production framing also requires `NUXT_SANITY_STUDIO_ORIGIN=https://studio.deflowlabs.io`; no preview token or cookie secret belongs in Studio.
+The dedicated preview website needs the server-side `SANITY_API_READ_TOKEN` and `NUXT_SANITY_PREVIEW_ENABLED=true`. Its Studio origin must be exact. No preview token or cookie secret belongs in Studio or the public website.
 
 ## Schema development and TypeGen
 
@@ -171,7 +186,7 @@ In **sanity.io/manage → API settings → CORS origins**, allow only exact requ
 
 - `http://localhost:3333` and `http://localhost:3000` for local work;
 - the production Studio origin;
-- the stable website origin used by Presentation;
+- `https://preview.deflowlabs.io`, the stable website origin used by Presentation;
 - stable protected staging origins when required.
 
 Enable credentials only where authenticated preview needs them. Do not use `*` or register every ephemeral Vercel URL. Keep tokens out of source and all browser-visible variables. Keep Vercel Deployment Protection enabled where available; Sanity authentication and dataset permissions remain mandatory.
@@ -202,7 +217,7 @@ Studio is a static single-page application. `vercel.json` builds `dist` and supp
 | Production Branch | `main` |
 | Domain | Dedicated domain, e.g. `studio.deflowlabs.io` |
 
-Configure all six `SANITY_STUDIO_*` variables separately for Vercel Development, Preview and Production. Use a preview dataset and stable protected website URL outside production.
+Configure all six `SANITY_STUDIO_*` variables separately for Vercel Development, Preview and Production. Production Studio must point to `https://preview.deflowlabs.io`; configuration intentionally rejects `https://deflowlabs.io` as its Presentation target.
 
 Before deployment:
 
