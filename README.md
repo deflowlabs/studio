@@ -93,7 +93,7 @@ Do not duplicate documents to bypass a featured-post, active-announcement or slu
 
 **Author/category:** use complete public names/descriptions and valid URLs. Deletion protection is reference-aware.
 
-**Labs project:** set validated status/dates, explicit display order, Partner reference, structured CTA, Portable Text details and SEO. Display order—not edit time—controls the website.
+**Labs project:** set a concise card summary, cover, validated status/dates, explicit display order and Partner reference. Display order—not edit time—controls the website. Former detail-page fields remain preserved but hidden because projects now appear only on the Labs index.
 
 **Website banner:** message and CTA form one unit. Use semantic tone and keep only one active, published banner.
 
@@ -107,9 +107,11 @@ Do not duplicate documents to bypass a featured-post, active-announcement or slu
 | Post | category order / category slug | Behavioural | First badge, all-category filtering and `announcements` placement |
 | Post | Featured post | Behavioural | One explicit featured story; announcement placement wins conflicts |
 | Post | cover crop/hotspot/alt | Rendered | Responsive image; 1600×900 recommended, 1200×675 minimum |
-| Post/Labs | SEO title, description, sharing image, noIndex | Behavioural | Metadata, 1200×630 sharing image, robots and sitemap |
+| Post | SEO title, description, sharing image, noIndex | Behavioural | Metadata, 1200×630 sharing image, robots and sitemap |
 | Author | portrait, role, biography, links | Rendered | Article attribution and author page; square 400×400 minimum |
-| Labs | details, dates, status, tags, CTA, displayOrder | Rendered + behavioural | Detail page, button treatment and stable order |
+| Labs | title, summary, cover, status, tags, partner | Rendered | Non-interactive `/labs` cards |
+| Labs | dates, displayOrder | Behavioural | Date validation and stable ordering; the dates are not displayed |
+| Labs | slug, details, publication URL, CTA, SEO | Legacy | Preserved read-only in existing documents; hidden and not queried publicly |
 | Partner | isPublic | Behavioural | Gates name, logo and URL; internal note is never queried |
 | Website banner | active, tone, CTA style and revision | Rendered + behavioural | Visibility, accessible treatment and dismissal reset |
 | Legacy/read-only fields | old SEO, partner text, old banner colours/links | Legacy | Preserved for migration history; not a public fallback |
