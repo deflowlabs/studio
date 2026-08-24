@@ -45,3 +45,17 @@ test('legacy Testimonials and unused Releases are absent from the editor experie
   assert.doesNotMatch(schemaIndex, /testimonial/i)
   assert.match(structure, /Website banners/)
 })
+
+test('Labs keeps retired detail fields without exposing a public detail route', async () => {
+  const retiredFields = ['slug', 'body', 'publicationUrl', 'cta', 'seo']
+  for (const name of retiredFields) {
+    const field = labsProject.fields.find(candidate => candidate.name === name) as { hidden?: boolean, readOnly?: boolean } | undefined
+    assert.equal(field?.hidden, true, `${name} should be hidden`)
+    assert.equal(field?.readOnly, true, `${name} should be preserved as read-only`)
+  }
+
+  const config = await readFile(new URL('../sanity.config.ts', import.meta.url), 'utf8')
+  assert.doesNotMatch(config, /route:\s*['"]\/labs\/:slug/)
+  assert.doesNotMatch(config, /href:\s*`\/labs\/\$\{/)
+  assert.match(config, /href:\s*['"]\/labs['"]/)
+})

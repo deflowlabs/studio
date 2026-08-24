@@ -75,15 +75,10 @@ export default defineConfig({
             filter: '_type == "post" && slug.current == $slug',
             params: ({ params }) => ({ slug: params.slug }),
           },
-          {
-            route: '/labs/:slug',
-            filter: '_type == "labsProject" && slug.current == $slug',
-            params: ({ params }) => ({ slug: params.slug }),
-          },
         ],
         locations: {
           post: { select: { title: 'title', slug: 'slug.current' }, resolve: doc => ({ locations: doc?.slug ? [{ title: doc.title || 'Post', href: `/blog/${doc.slug}` }] : [] }) },
-          labsProject: { select: { title: 'title', slug: 'slug.current' }, resolve: doc => ({ locations: doc?.slug ? [{ title: doc.title || 'Labs project', href: `/labs/${doc.slug}` }, { title: 'Labs', href: '/labs' }] : [{ title: 'Labs', href: '/labs' }] }) },
+          labsProject: { select: { title: 'title' }, resolve: doc => ({ locations: [{ title: doc?.title || 'Labs', href: '/labs' }] }) },
           announcement: { locations: [{ title: 'Homepage', href: '/' }] },
         },
       },
