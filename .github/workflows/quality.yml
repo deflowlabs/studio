@@ -98,6 +98,16 @@ jobs:
           VERCEL_ENV: production
           NUXT_PUBLIC_SITE_URL: https://deflowlabs.io
           NUXT_SANITY_PREVIEW_ENABLED: 'false'
+          NUXT_SANITY_PROJECT_ID: i34vbeac
+          NUXT_SANITY_DATASET: production
+          NUXT_SANITY_API_VERSION: 2026-08-17
+          SANITY_REVALIDATE_SECRET: ci-revalidate-secret
+          VERCEL_ISR_BYPASS_TOKEN: ci-isr-bypass-token
+          NUXT_PUBLIC_TURNSTILE_SITE_KEY: ci-turnstile-site-key
+          TURNSTILE_SECRET_KEY: ci-turnstile-secret
+          RESEND_API_KEY: ci-resend-key
+          PII_SALT_SECRET: ci-pii-salt
+          POSTGRES_URL: postgresql://ci:ci@127.0.0.1:5432/ci
 
   dataset:
     name: Dataset Validation & Migration Dry Run
@@ -161,6 +171,7 @@ jobs:
         run: |
           mkdir -p .ci-reports/semgrep
           docker run --rm --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp/semgrep-home -e XDG_CACHE_HOME=/tmp/semgrep-cache \
             -v "$PWD:/src:ro" -v "$PWD/.ci-reports/semgrep:/reports" \
             "$SEMGREP_IMAGE" semgrep scan --oss-only --no-git-ignore --config /src/.semgrep.yml --error --severity ERROR \
             --exclude '**/.git/**' --exclude '**/node_modules/**' --exclude '**/.sanity/**' \
