@@ -1,7 +1,8 @@
-name: Studio quality
+name: Studio Quality
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
 
@@ -12,54 +13,196 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NODE_VERSION: '24'
+  SEMGREP_IMAGE: semgrep/semgrep:1.136.0@sha256:cda1b566fafbf6010a02a3ea1d265b1c8eba4380e489a13891a102243d81ca6f
+  SANITY_STUDIO_PROJECT_ID: i34vbeac
+  SANITY_STUDIO_DATASET: production
+  SANITY_STUDIO_API_VERSION: 2026-08-17
+  SANITY_STUDIO_PREVIEW_URL: http://localhost:3000
+  SANITY_STUDIO_HOST: http://localhost:3333
+  SANITY_STUDIO_ENABLE_VISION: 'false'
+
 jobs:
-  verify:
+  local-quality:
+    name: Schema, Tests & Build
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    env:
-      SANITY_STUDIO_PROJECT_ID: i34vbeac
-      SANITY_STUDIO_DATASET: production
-      SANITY_STUDIO_API_VERSION: 2026-08-17
-      SANITY_STUDIO_PREVIEW_URL: http://localhost:3000
-      SANITY_STUDIO_HOST: http://localhost:3333
-      SANITY_STUDIO_ENABLE_VISION: 'false'
-      # Validation and migration dry-runs do not write content. Default to the
-      # configured production dataset so a separate CI dataset is optional.
-      SANITY_VALIDATION_DATASET: ${{ vars.SANITY_VALIDATION_DATASET || 'production' }}
-      SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          node-version: 24
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - id: install
-        run: npm ci
+      - run: npm ci
       - id: check
         run: npm run check
+      - name: Enforce checked-in schema extraction
+        run: git diff --exit-code -- schema.json
       - id: build
         run: npm run build
-      - name: Validate dataset documents
-        id: dataset
-        if: ${{ env.SANITY_AUTH_TOKEN != '' }}
-        run: npx sanity documents validate --dataset "$SANITY_VALIDATION_DATASET"
-      - name: Dry-run additive migration
-        id: migration
-        if: ${{ env.SANITY_AUTH_TOKEN != '' }}
-        run: npx sanity migration run 001-structured-content --dry-run --project "$SANITY_STUDIO_PROJECT_ID" --dataset "$SANITY_VALIDATION_DATASET"
       - id: audit
         run: npm audit --omit=dev --audit-level=high
-      - name: Publish Studio summary
-        if: always()
+
+  website-contract:
+    name: Studio / Website Contract
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Create read-only organisation token
+        id: app-token
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        with:
+          app-id: ${{ vars.DEFLOW_CI_APP_ID }}
+          private-key: ${{ secrets.DEFLOW_CI_APP_PRIVATE_KEY }}
+          owner: deflowlabs
+          repositories: website
+          permission-contents: read
+      - name: Check out Studio
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: studio
+          persist-credentials: false
+      - name: Check out website consumer
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: deflowlabs/website
+          ref: main
+          path: website
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            studio/package-lock.json
+            website/package-lock.json
+      - run: npm ci
+        working-directory: studio
+      - run: npm ci
+        working-directory: website
+      - name: Generate consumer types from proposed schema
+        working-directory: studio
+        run: npm run schema:extract && npm run typegen
+      - name: Detect generated contract drift
+        working-directory: website
+        run: git diff --exit-code -- app/types/sanity.generated.ts
+      - name: Verify website consumer
+        working-directory: website
+        run: npm test && npm run typecheck && npm run build
+        env:
+          VERCEL_ENV: production
+          NUXT_PUBLIC_SITE_URL: https://deflowlabs.io
+          NUXT_SANITY_PREVIEW_ENABLED: 'false'
+
+  dataset:
+    name: Dataset Validation & Migration Dry Run
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+      SANITY_VALIDATION_DATASET: ${{ vars.SANITY_VALIDATION_DATASET || 'production' }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Require protected-branch validation credential
+        run: test -n "$SANITY_AUTH_TOKEN"
+      - name: Validate dataset documents
+        run: npx sanity documents validate --dataset "$SANITY_VALIDATION_DATASET"
+      - name: Dry-run additive migration
+        run: npx sanity migration run 001-structured-content --dry-run --project "$SANITY_STUDIO_PROJECT_ID" --dataset "$SANITY_VALIDATION_DATASET"
+
+  security:
+    name: Source & Supply Chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Lint workflow syntax
+        env:
+          GOBIN: ${{ runner.temp }}/actionlint
         run: |
-          {
-            echo '## Sanity Studio quality'
-            echo
-            echo '| Gate | Result |'
-            echo '|---|---|'
-            echo '| Types, validators and schema extraction | `${{ steps.check.outcome }}` |'
-            echo '| Production build | `${{ steps.build.outcome }}` |'
-            echo '| Dataset validation | `${{ steps.dataset.outcome || 'skipped' }}` |'
-            echo '| Migration dry run | `${{ steps.migration.outcome || 'skipped' }}` |'
-            echo '| Production dependency audit | `${{ steps.audit.outcome }}` |'
-          } >> "$GITHUB_STEP_SUMMARY"
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+          "$GOBIN/actionlint" -color
+      - name: Audit workflow security
+        uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+        with:
+          advanced-security: false
+          annotations: true
+          min-severity: high
+          online-audits: false
+          persona: auditor
+          version: 1.29.0
+      - name: Scan secrets and configuration
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: secret,misconfig
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          format: json
+          output: trivy-fs.json
+          trivy-version: v0.72.0
+      - name: Run repository Semgrep policy
+        run: |
+          mkdir -p .ci-reports/semgrep
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$PWD:/src:ro" -v "$PWD/.ci-reports/semgrep:/reports" \
+            "$SEMGREP_IMAGE" semgrep scan --oss-only --no-git-ignore --config /src/.semgrep.yml --error --severity ERROR \
+            --exclude '**/.git/**' --exclude '**/node_modules/**' --exclude '**/.sanity/**' \
+            --exclude '**/.output/**' --exclude '**/dist/**' --exclude '**/coverage/**' \
+            --json-output /reports/semgrep.json /src/components /src/migrations /src/schemas /src/tests \
+            /src/permissions.ts /src/sanity.cli.ts /src/sanity.config.ts /src/structure.ts /src/validators.ts
+      - name: Generate CycloneDX SBOM
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          format: cyclonedx
+          output: sbom.cdx.json
+          exit-code: '0'
+          trivy-version: v0.72.0
+      - name: Upload security evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: studio-security-${{ github.sha }}
+          path: |
+            trivy-fs.json
+            sbom.cdx.json
+            .ci-reports/semgrep/
+          if-no-files-found: warn
+          retention-days: 90
+
+  required:
+    name: Studio / Required
+    if: always()
+    needs: [local-quality, website-contract, dataset, security]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce required gates
+        env:
+          LOCAL: ${{ needs.local-quality.result }}
+          CONTRACT: ${{ needs.website-contract.result }}
+          DATASET: ${{ needs.dataset.result }}
+          SECURITY: ${{ needs.security.result }}
+        run: |
+          test "$LOCAL" = success
+          test "$SECURITY" = success
+          test "$CONTRACT" = success || test "$CONTRACT" = skipped
+          test "$DATASET" = success || test "$DATASET" = skipped

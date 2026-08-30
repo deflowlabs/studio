@@ -195,14 +195,25 @@ Enable credentials only where authenticated preview needs them. Do not use `*` o
 
 ## GitHub Actions
 
-`.github/workflows/quality.yml` runs on every pull request and push to `main` with Node 24. It checks types, validators, schema extraction, tests, the production-equivalent Studio build and production dependencies, then publishes a concise run summary. When `SANITY_AUTH_TOKEN` is configured, it also validates documents and dry-runs the additive migration against the repository variable `SANITY_VALIDATION_DATASET`. Both commands are read-only: when the variable is absent, CI validates `production`; set it to an existing isolated dataset such as `preview` if the project has one.
+`.github/workflows/quality.yml` runs on every pull request and push to `main` with Node 24. Its stable required check is `Studio / Required`, aggregating:
+
+- types, validators, tests, deterministic checked-in schema extraction, production build and production dependency audit;
+- schema extraction and TypeGen against a fresh read-only checkout of the website, followed by the website's unit, type and production-build checks;
+- authenticated dataset validation and additive-migration dry run on trusted branches;
+- actionlint, zizmor, Semgrep, Trivy secret/misconfiguration checks and a CycloneDX SBOM.
 
 | GitHub setting | Purpose | Required |
 |---|---|---|
 | Secret `SANITY_AUTH_TOKEN` | Least-privilege token for dataset validation and migration dry run | Recommended on protected branches |
 | Variable `SANITY_VALIDATION_DATASET` | Existing dataset used by read-only validation and migration dry-runs; defaults to `production` | Optional |
+| Variable `DEFLOW_CI_APP_ID` | Organisation GitHub App ID used to mint a short-lived website read token | Required for trusted branches |
+| Secret `DEFLOW_CI_APP_PRIVATE_KEY` | GitHub App private key | Required for trusted branches |
 
-Fork pull requests do not receive the secret, so network dataset gates show as skipped while local schema/tests/build still run. Dependabot reviews npm and GitHub Actions updates weekly. Action dependencies are pinned to immutable SHAs and obsolete runs are cancelled.
+Fork pull requests receive neither Sanity nor organisation credentials, so cross-repository and dataset jobs are skipped while local schema/tests/build and security gates still run. Trusted branches fail closed when the required credential is absent. Grant the GitHub App read-only Contents access to `deflowlabs/website` only; never replace it with a personal access token.
+
+Repository workflow permissions can remain read-only. Studio workflows do not require **Allow GitHub Actions to create and approve pull requests**; that permission is needed only by the core repository's reviewed product-governance sync.
+
+`@deflowlabs/engineering` owns the repository through `.github/CODEOWNERS`. Protect `main`, require code-owner review, conversation resolution and `Studio / Required`, and prevent force pushes. Dependabot surfaces all update levels for review, while action dependencies remain pinned to immutable SHAs.
 
 ## Vercel deployment
 

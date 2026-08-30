@@ -12,9 +12,6 @@ updates:
       development-dependencies:
         dependency-type: development
         update-types: [minor, patch]
-    ignore:
-      - dependency-name: '*'
-        update-types: [version-update:semver-major]
     labels: [dependencies]
   - package-ecosystem: github-actions
     directory: /

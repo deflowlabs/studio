@@ -1,0 +1,20 @@
+rules:
+  - id: deflow-javascript-eval
+    message: Dynamic code evaluation is prohibited in Studio runtime code.
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+    paths:
+      exclude: [node_modules, dist, .sanity]
+
+  - id: deflow-unsafe-dom-html
+    message: Direct HTML assignment needs an approved sanitisation boundary.
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern-either:
+      - pattern: $EL.innerHTML = $VALUE
+      - pattern: $EL.outerHTML = $VALUE
+    paths:
+      include: [components, schemas]

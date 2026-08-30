@@ -1,0 +1,7 @@
+* @deflowlabs/engineering
+/.github/ @deflowlabs/engineering
+/schemas/ @deflowlabs/engineering
+/migrations/ @deflowlabs/engineering
+/sanity.config.ts @deflowlabs/engineering
+/sanity.cli.ts @deflowlabs/engineering
+/vercel.json @deflowlabs/engineering
