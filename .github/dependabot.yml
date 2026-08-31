@@ -5,6 +5,13 @@ updates:
     schedule:
       interval: weekly
       day: monday
+      time: "06:00"
+      timezone: Europe/Lisbon
+    cooldown:
+      default-days: 7
+      semver-patch-days: 3
+      semver-minor-days: 7
+      semver-major-days: 30
     groups:
       production-dependencies:
         dependency-type: production
@@ -18,4 +25,15 @@ updates:
     schedule:
       interval: weekly
       day: monday
+      time: "06:00"
+      timezone: Europe/Lisbon
+    cooldown:
+      default-days: 7
+      semver-patch-days: 3
+      semver-minor-days: 7
+      semver-major-days: 30
+    groups:
+      github-actions:
+        patterns: ["*"]
+        update-types: [minor, patch]
     labels: [dependencies, ci]

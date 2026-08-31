@@ -206,12 +206,14 @@ Enable credentials only where authenticated preview needs them. Do not use `*` o
 |---|---|---|
 | Secret `SANITY_AUTH_TOKEN` | Least-privilege token for dataset validation and migration dry run | Recommended on protected branches |
 | Variable `SANITY_VALIDATION_DATASET` | Existing dataset used by read-only validation and migration dry-runs; defaults to `production` | Optional |
-| Variable `DEFLOW_CI_APP_ID` | Organisation GitHub App ID used to mint a short-lived website read token | Required for trusted branches |
+| Variable `DEFLOW_CI_APP_CLIENT_ID` | Organisation GitHub App client ID used to mint a short-lived website read token | Required for trusted branches |
 | Secret `DEFLOW_CI_APP_PRIVATE_KEY` | GitHub App private key | Required for trusted branches |
 
 Fork pull requests receive neither Sanity nor organisation credentials, so cross-repository and dataset jobs are skipped while local schema/tests/build and security gates still run. Trusted branches fail closed when the required credential is absent. Grant the GitHub App read-only Contents access to `deflowlabs/website` only; never replace it with a personal access token.
 
 Repository workflow permissions can remain read-only. Studio workflows do not require **Allow GitHub Actions to create and approve pull requests**; that permission is needed only by the core repository's reviewed product-governance sync.
+
+The v3 token action consumes the App client ID. Keep the legacy `DEFLOW_CI_APP_ID` variable only until the first successful default-branch run using `DEFLOW_CI_APP_CLIENT_ID`, then remove it. Dependabot checks run on Mondays at 06:00 Europe/Lisbon with 3-, 7- and 30-day patch/minor/major cooldowns; security updates are not delayed. After `Studio Quality` succeeds, `dependabot-queue.yml` enables native squash auto-merge, but one maintainer approval and all protected-branch requirements remain mandatory.
 
 `@deflowlabs/engineering` owns the repository through `.github/CODEOWNERS`. Protect `main`, require code-owner review, conversation resolution and `Studio / Required`, and prevent force pushes. Dependabot surfaces all update levels for review, while action dependencies remain pinned to immutable SHAs.
 
