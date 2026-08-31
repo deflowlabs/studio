@@ -9,9 +9,6 @@ updates:
       timezone: Europe/Lisbon
     cooldown:
       default-days: 7
-      semver-patch-days: 3
-      semver-minor-days: 7
-      semver-major-days: 30
     groups:
       production-dependencies:
         dependency-type: production
