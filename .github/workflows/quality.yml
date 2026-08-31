@@ -52,11 +52,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Create read-only organisation token
-        id: app-token
+      - name: Create read-only organisation token with client ID
+        if: vars.DEFLOW_CI_APP_CLIENT_ID != ''
+        id: app-token-client
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ vars.DEFLOW_CI_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DEFLOW_CI_APP_PRIVATE_KEY }}
+          owner: deflowlabs
+          repositories: website
+          permission-contents: read
+      - name: Create read-only organisation token with legacy App ID
+        if: vars.DEFLOW_CI_APP_CLIENT_ID == ''
+        id: app-token-legacy
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.DEFLOW_CI_APP_ID }}
           private-key: ${{ secrets.DEFLOW_CI_APP_PRIVATE_KEY }}
           owner: deflowlabs
           repositories: website
@@ -72,7 +83,7 @@ jobs:
           repository: deflowlabs/website
           ref: main
           path: website
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ steps.app-token-client.outputs.token || steps.app-token-legacy.outputs.token }}
           persist-credentials: false
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
