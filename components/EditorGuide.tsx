@@ -1,14 +1,12 @@
 import type { ComponentType, ReactNode } from 'react'
-import {
-  CheckmarkCircleIcon,
-  ComposeIcon,
-  DocumentIcon,
-  EyeOpenIcon,
-  ProjectsIcon,
-  PublishIcon,
-  RocketIcon,
-  WarningOutlineIcon,
-} from '@sanity/icons'
+import { CheckmarkCircleIcon } from '@sanity/icons/CheckmarkCircle'
+import { ComposeIcon } from '@sanity/icons/Compose'
+import { DocumentIcon } from '@sanity/icons/Document'
+import { EyeOpenIcon } from '@sanity/icons/EyeOpen'
+import { ProjectsIcon } from '@sanity/icons/Projects'
+import { PublishIcon } from '@sanity/icons/Publish'
+import { RocketIcon } from '@sanity/icons/Rocket'
+import { WarningOutlineIcon } from '@sanity/icons/WarningOutline'
 import { Badge, Box, Card, Flex, Grid, Heading, Stack, Text } from '@sanity/ui'
 
 interface WorkflowStep {
