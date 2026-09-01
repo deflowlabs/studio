@@ -1,5 +1,5 @@
 import { defineField, defineType } from 'sanity'
-import { BellIcon } from '@sanity/icons'
+import { BellIcon } from '@sanity/icons/Bell'
 import { requireCtaPair, uniqueEnabledDocument } from '../validators.ts'
 
 export default defineType({

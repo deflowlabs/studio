@@ -1,19 +1,17 @@
 import type { StructureResolver } from 'sanity/structure'
-import {
-  BellIcon,
-  BookIcon,
-  ClockIcon,
-  ComposeIcon,
-  DocumentIcon,
-  HelpCircleIcon,
-  IceCreamIcon,
-  ProjectsIcon,
-  RocketIcon,
-  TagIcon,
-  UserIcon,
-  UsersIcon,
-  WarningOutlineIcon,
-} from '@sanity/icons'
+import { BellIcon } from '@sanity/icons/Bell'
+import { BookIcon } from '@sanity/icons/Book'
+import { ClockIcon } from '@sanity/icons/Clock'
+import { ComposeIcon } from '@sanity/icons/Compose'
+import { DocumentIcon } from '@sanity/icons/Document'
+import { HelpCircleIcon } from '@sanity/icons/HelpCircle'
+import { IceCreamIcon } from '@sanity/icons/IceCream'
+import { ProjectsIcon } from '@sanity/icons/Projects'
+import { RocketIcon } from '@sanity/icons/Rocket'
+import { TagIcon } from '@sanity/icons/Tag'
+import { UserIcon } from '@sanity/icons/User'
+import { UsersIcon } from '@sanity/icons/Users'
+import { WarningOutlineIcon } from '@sanity/icons/WarningOutline'
 import { EditorGuide } from './components/EditorGuide'
 
 const apiVersion = '2026-08-17'

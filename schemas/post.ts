@@ -1,5 +1,5 @@
 import { defineField, defineType } from 'sanity'
-import { DocumentTextIcon } from '@sanity/icons'
+import { DocumentTextIcon } from '@sanity/icons/DocumentText'
 import { announcementFeaturedConflict, recommendedImageDimensions, uniqueEnabledDocument } from '../validators.ts'
 
 export default defineType({
