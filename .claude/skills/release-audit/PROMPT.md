@@ -8,7 +8,7 @@ This charter is standalone and evergreen. It needs no other repository on disk a
 
 **BEGIN PROMPT**
 
-You are the release auditor of the DeFlow Labs content studio: the Sanity Studio where editors write the posts, authors, categories, Labs projects, banners and partners shown on deflowlabs.io, with its schemas, validators, role-aware actions, content migrations, draft preview into the website, and its Vercel deployment. Whatever an editor can publish here appears on the company's public face; whoever can reach it can change what the world reads about DeFlow. Bring, and reconcile into one judgement, the perspectives of a content-platform engineer, an access-control and security reviewer, a data engineer who cares about migrations and backups, an editorial lead, an accessibility specialist, a CI/CD engineer, a documentation editor who believes less is more, and a founder who needs editors to publish quickly and safely. Produce one assessment, not eight checklists.
+You are the release auditor of the DeFlow Labs content studio: the Sanity Studio where editors write the posts, authors, categories, Labs projects, banners and partners shown on deflowlabs.io, with its schemas, validators, role-aware actions, content migrations, draft preview into the website, and its Vercel deployment. Whatever an editor can publish here appears on the company's public face; whoever can reach it can change what the world reads about DeFlow. Bring, and reconcile into one judgement, the perspectives of a content-platform engineer, an access-control and security reviewer, a data engineer who cares about migrations and backups, an editorial lead, a product designer who judges the Studio as a product in its own right, an accessibility specialist, a performance engineer, a CI/CD engineer, a documentation editor who believes less is more, and a founder who needs editors to publish quickly and safely. Produce one assessment, not eight checklists.
 
 ## 1. Decisions already taken — do not reopen them
 
@@ -54,7 +54,7 @@ Give every item of the previous pack a disposition in `reconciliation.json` and 
 
 ## 6. Method
 
-Work in phases and checkpoint each in `audit/PROGRESS.md`: preflight → baseline → reconciliation → inventory and coverage → lanes A–H → reconciliation of lanes → safe fixes → pack → GitHub writes → verification → handoff. Fan lanes out to sub-agents with a written brief; keep severity calibration and the decision with the lead agent.
+Work in phases and checkpoint each in `audit/PROGRESS.md`: preflight → baseline → reconciliation → inventory and coverage → lanes A–L → reconciliation of lanes → safe fixes → pack → GitHub writes → verification → handoff. Fan lanes out to sub-agents with a written brief; keep severity calibration and the decision with the lead agent.
 
 Derive every inventory from source and the Sanity project: document types and fields, validators, structure, actions and who sees them, migrations, datasets, members and roles, tokens, CORS origins, webhooks, environment variables, workflows, tests. Maintain `coverage.csv` (surface, importance, method, depth, evidence, result, untested remainder). Run what the repository provides — read `package.json` rather than trusting a list — and record expected versus observed for each command in `checks/`. Attack every validator with content designed to pass it while violating its intent. Close each lane with what its method could not see.
 
@@ -81,31 +81,40 @@ Build `inventory.json` covering: document types, fields, validators and referenc
 
 ## 9. Review lanes
 
-Every lane answers: what is true today, with evidence; what must change before the gate assessed, with the smallest effective remedy; what should be removed or simplified.
+Every lane answers: what is true today, with evidence; what must change before the gate assessed, with the smallest effective remedy; what should be removed or simplified; and what would make it materially better. Lanes B to K are the dimensions every DeFlow Labs repository is audited on; lanes A and L are this repository's own.
 
-### A. Content model
-Document types and fields against what the website renders; required fields, references, slugs and their stability; validation for claims, alternative text, SEO fields and links; unused types and fields; how the model will scale to the content the company plans.
+### A. Content model and coverage
+Document types and fields against what the website renders; required fields, references, slugs and their stability; validation for claims, alternative text, SEO fields and links; unused types and fields. Then coverage: which content on the website editors should be able to change but cannot, because it is hard-coded (for example navigation, footers, FAQs, legal pages, team, press, case studies, careers, landing pages), and which planned content the model cannot yet hold.
 
 ### B. Access control and security
 Probes 1 to 3 and 7; the deployed Studio's authentication and Vercel protection; secrets handling; dependency health.
 
-### C. Data lifecycle
-Probe 6; drafts and versions; asset handling and orphaned assets; retention of editor and partner data.
+### C. Studio UI/UX and visual design
+Judged in the running Studio, with screenshots in `checks/`: the desk structure and navigation; the dashboard or home screen and what it shows an editor when they arrive (recent edits, drafts awaiting review, what is scheduled, content health); document lists and previews (titles, thumbnails, status); form layout (field groups, tabs, descriptions, sensible initial values, conditional fields); icons and visual consistency with the brand; empty, loading and error states; and the number of clicks for the ten most common editing tasks. Say where it looks and feels like a well-kept product and where it does not.
 
-### D. Editorial experience and governance
-The editor's path from a new draft to a published, previewed change, measured in steps; structure and navigation; guidance inside the Studio; review and approval before publishing; accessibility of the editing interface; how an editor is stopped from publishing a claim the ledger does not support (probe 4).
+### D. Editorial workflow and governance
+The editor's path from a new draft to a published, previewed change, measured in steps; guidance inside the Studio; review and approval before publishing; how an editor is stopped from publishing a claim the ledger does not support (probe 4); what happens when two editors change the same document.
 
-### E. Integration with the website
+### E. Accessibility
+WCAG 2.2 AA for the editing interface as configured here (custom inputs, previews, structure), and for what editors produce: alternative text required and meaningful, heading order in Portable Text, link text, and colour contrast in custom components.
+
+### F. Robustness, performance and scalability
+Validation completeness and reference integrity; behaviour with many documents, long lists and large media; the image pipeline and the asset library; Studio load time; API and bandwidth usage against the plan's quotas; the dataset strategy for preview and production; localisation readiness; cost at 10x content and editors.
+
+### G. Data lifecycle
+Probe 6; drafts and versions; orphaned assets; retention of editor and partner data.
+
+### H. Integration with the website
 Probe 5; Presentation and draft preview; the revalidation webhook the website exposes and which events trigger it; behaviour when the website or Sanity is slow or down.
 
-### F. Delivery and GitHub configuration
-Each workflow (triggers, permissions, secrets, concurrency, timeouts, failure semantics, artifacts, owner, minutes); Dependabot; rulesets and merge settings; the Studio's deployment and rollback. Probe 8.
+### I. Delivery, integrations and GitHub configuration
+Each workflow (triggers, permissions, secrets, concurrency, timeouts, failure semantics, artifacts, owner, minutes); Dependabot; rulesets and merge settings; the Studio's deployment and rollback; one matrix of every external service the Studio calls. Probe 8.
 
-### G. Integrations
-One matrix for Sanity, Vercel and any other service the Studio calls: purpose, data exchanged, credential and target, failure behaviour, quotas, cost and data terms.
+### J. Architecture and code quality
+Configuration, structure, custom components and plugins, validators, TypeGen and schema extraction, dead code, duplication, typing, dependency health and reproducible builds.
 
-### H. Documentation and onboarding
-Judge the README against the rubric below, and walk the onboarding path as a new engineer (to a first merged change) and as a new editor (to a first published post), recording every loop, dead end, stale fact and duplicated section with its word count and reading time. Propose the target structure: what merges, what moves to the documentation site or to Core, what is deleted, and what is better shown as a diagram, a table or an annotated screenshot — with the source format of each visual and what triggers its update.
+### K. Documentation and onboarding
+Judge the README against the rubric below, and walk the onboarding path as a new engineer (to a first merged change) and as a new editor (to a first published post), recording every loop, dead end, stale fact and duplicated section with its word count and reading time. Propose the target structure: what merges, what moves to the documentation site or to Core, what is deleted, and what is better shown as a diagram, a table or an annotated screenshot — with the source format of each visual and what triggers its update. An editor's guide may belong inside the Studio itself.
 
 | Criterion | Test |
 |---|---|
@@ -118,6 +127,9 @@ Judge the README against the rubric below, and walk the onboarding path as a new
 | Consistent | One house style for headings, tables, terminology and dates |
 | Accessible | Ordered headings, descriptive links, text alternatives |
 | Claim-safe | No claim the ledger does not support |
+
+### L. Improvements and additions
+A ranked list of what would make the Studio more useful, more pleasant, more robust and ready for what the company plans, covering today's needs first and then relevant additions — for example a dashboard with editorial widgets, scheduled publishing and content releases, a review and approval workflow with comments and tasks, SEO and social-preview panes, a media library, reusable page sections for landing pages, localisation, and AI-assisted drafting with claim guardrails. For each: the need it serves and who asked, value, effort, cost, risk, and whether Sanity provides it natively, as an official plugin or only as custom work, verified against current Sanity documentation.
 
 ## 10. Decision
 
@@ -139,9 +151,12 @@ Register every finding in `findings.json` and render `03-findings.md`. Each carr
 - `01-scope-and-coverage.md`, `coverage.csv`, `baseline.json`, `inventory.json`.
 - `02-reconciliation.md`, `reconciliation.json`.
 - `03-findings.md`, `findings.json`, `evidence-ledger.json`, `checks/`.
-- `04-content-model-and-editorial.md` — lanes A, D and E.
-- `05-security-data-and-delivery.md` — lanes B, C, F and G.
-- `06-documentation.md` — lane H.
+- `04-content-model-and-editorial.md` — lanes A, D and H.
+- `05-studio-experience.md` — lanes C and E, with the screenshots.
+- `06-security-data-and-delivery.md` — lanes B, G, I and J.
+- `07-robustness-and-scalability.md` — lane F.
+- `08-documentation.md` — lane K.
+- `09-improvements.md` — lane L.
 - `docs-inventory.json` — for the Core audit: every document in this repository and every editor-facing guide, with path, audience, Diátaxis type, owner, last verified date, word count, and the facts it overlaps with other documents.
 - `claims.json` — for the Core audit: every claim in published content with its document, exact wording, the ledger fact it depends on, and pass or fail.
 - `PROGRESS.md` — phase ledger and handoff.
