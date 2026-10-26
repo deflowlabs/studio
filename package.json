@@ -17,20 +17,20 @@
     "node": ">=24 <25"
   },
   "dependencies": {
-    "@sanity/code-input": "7.3.7",
-    "@sanity/icons": "5.2.1",
-    "@sanity/ui": "3.5.3",
-    "@sanity/vision": "6.10.1",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "sanity": "6.10.1",
-    "styled-components": "6.5.3",
+    "@sanity/code-input": "7.3.13",
+    "@sanity/icons": "5.2.3",
+    "@sanity/ui": "3.5.5",
+    "@sanity/vision": "6.19.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "sanity": "6.19.0",
+    "styled-components": "6.6.0",
     "typescript": "5.9.3"
   },
   "devDependencies": {
     "@types/node": "26.1.2",
-    "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.5"
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
   },
   "overrides": {
     "js-yaml": ">=4.3.1",
